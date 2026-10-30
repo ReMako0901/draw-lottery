@@ -38,6 +38,27 @@
     for(let i=0;i<a.length;i++) for(let j=0;j<b.length;j++) if(intersects(a[i],a[(i+1)%a.length],b[j],b[(j+1)%b.length])) return true;
     return false;
   }
+  // 最後に伸ばした線が既存の線を横切ったら、最初の交点で輪を切り出す。
+  function closedLoop(path) {
+    const n=path.length;
+    if(n<4)return null;
+    const a=path[n-2],b=path[n-1],rx=b.x-a.x,ry=b.y-a.y,candidates=[];
+    for(let i=0;i<n-3;i++){
+      const c=path[i],d=path[i+1],sx=d.x-c.x,sy=d.y-c.y;
+      const denominator=rx*sy-ry*sx;
+      if(Math.abs(denominator)<EPS)continue;
+      const t=((c.x-a.x)*sy-(c.y-a.y)*sx)/denominator;
+      const u=((c.x-a.x)*ry-(c.y-a.y)*rx)/denominator;
+      if(t<-EPS || t>1+EPS || u<-EPS || u>1+EPS)continue;
+      const hit={x:a.x+Math.max(0,Math.min(1,t))*rx,y:a.y+Math.max(0,Math.min(1,t))*ry};
+      const poly=[hit,...path.slice(i+1,n-1)];
+      for(let j=poly.length-1;j>0;j--)if(distance(poly[j],poly[j-1])<EPS)poly.splice(j,1);
+      if(poly.length>2 && distance(poly[0],poly[poly.length-1])<EPS)poly.pop();
+      if(poly.length>=3 && area(poly)>=0.0001 && !selfIntersects(poly))candidates.push({t,poly});
+    }
+    candidates.sort((x,y)=>x.t-y.t);
+    return candidates[0]?.poly||null;
+  }
   function multiplier(a,config) {
     if(a<=0) return 0;
     const anchors=config.returnAnchors;
@@ -64,7 +85,7 @@
     if(quote([...polys,poly],config).area>config.maxArea+EPS) return '囲める面積は85％までです';
     return null;
   }
-  const api={distance,segmentLength,contains,area,perimeter,selfIntersects,overlaps,multiplier,quote,validate};
+  const api={distance,segmentLength,contains,area,perimeter,selfIntersects,overlaps,closedLoop,multiplier,quote,validate};
   if(typeof module!=='undefined') module.exports=api;
   else root.GameMath=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -35,7 +35,7 @@ frame(1200);assert.equal(read('coins'),1884);assert.equal(read('phase'),'result'
 click('primary');assert.equal(read('coins'),1784);assert.equal(read('polygons.length'),0);assert.equal(read('history.length'),1);
 draw(square);click('undo');assert.equal(read('polygons.length'),0);
 draw(square);click('clear');assert.equal(read('polygons.length'),0);
-draw([[.1,.1],[.4,.4],[.1,.4],[.4,.1]]);assert.equal(read('polygons.length'),0);
+draw([[.1,.1],[.4,.4],[.1,.4],[.4,.1]]);assert.equal(read('polygons.length'),1);click('clear');
 draw([[.01,.01],[.99,.01],[.99,.99],[.01,.99]]);assert.equal(read('polygons.length'),0);
 element('unit-length').onchange({target:{value:'.5'}});assert.equal(read('config.drawingCostUnitLength'),.25);
 draw(square);random=.8;click('primary');frame(1200);assert.equal(read('coins'),1768);
@@ -60,4 +60,9 @@ assert.equal(read('G.quote(polygons,config).area').toFixed(2),'0.04');
 click('clear');
 draw([[.1,.1],[.3,.1],[.3,.3],[.1,.3],[.1,.13]],false);
 assert.equal(read('polygons.length'),0); // 30px離れていれば自動で閉じない。
+// 始点を通り越して交差。手前のしっぽと交点以降の線は領域に含めない。
+draw([[.05,.3],[.3,.3],[.3,.6],[.6,.6],[.6,.3],[.2,.3]],false);
+assert.equal(read('polygons.length'),1);
+assert.equal(read('G.area(polygons[0])').toFixed(2),'0.09');
+assert.equal(read('G.contains(polygons[0],{x:.1,y:.3})'),false);
 console.log('PASS: start, draw, reject overlap/crossing/oversize, undo, clear, hit/miss settlement, history, deferred settings, insufficient coins, reset');

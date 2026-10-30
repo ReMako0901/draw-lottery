@@ -102,26 +102,37 @@ canvas.addEventListener('pointerdown',e=>{
   if(phase!=='drawing' || pointer!==null || e.button!==0)return;
   const p=point(e);
   if(polygons.some(poly=>G.contains(poly,p))){message('青い領域の外から描き始めてください',true);return;}
-  pointer=e.pointerId;draft=[p];canvas.setPointerCapture(pointer);message('始点の丸まで戻り、指を離して囲みを確定');refresh();
+  pointer=e.pointerId;draft=[p];canvas.setPointerCapture(pointer);message('一周描いて線を交差させるか、始点まで戻ってください');refresh();
 });
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerId!==pointer)return;
-  const p=point(e);
-  if(G.distance(draft[draft.length-1],p)>=.004 && draft.length<650){
-    draft.push(p);
-    message(draft.length>=3 && screenDistance(draft[0],p)<=config.closureTolerancePx?'始点につながりました。指を離して確定':'始点の丸まで戻り、指を離して囲みを確定');
-    refresh();
+  const samples=e.getCoalescedEvents?.()||[];
+  for(const sample of samples.length?samples:[e]){
+    const p=point(sample);
+    if(G.distance(draft[draft.length-1],p)>=.004 && draft.length<650){
+      draft.push(p);
+      const loop=G.closedLoop(draft);
+      if(loop){complete(loop,e);return;}
+    }
   }
+  const p=point(e);
+  message(draft.length>=3 && screenDistance(draft[0],p)<=config.closureTolerancePx?'始点につながりました。指を離して確定':'一周描いて線を交差させるか、始点まで戻ってください');
+  refresh();
 });
 function finish(e){
   if(e.pointerId!==pointer)return;
   const p=point(e);
   if(G.distance(draft[draft.length-1],p)>.002)draft.push(p);
+  const loop=G.closedLoop(draft);
+  if(loop){complete(loop,e);return;}
   const closed=draft.length>=3 && screenDistance(draft[0],p)<=config.closureTolerancePx;
   // 吸着範囲内の終端を整理し、始点にぴったりつながる輪郭で判定する。
   if(closed)while(draft.length>3 && screenDistance(draft[0],draft[draft.length-1])<=config.closureTolerancePx)draft.pop();
-  const error=closed?G.validate(draft,polygons,config):'線が閉じていません。始点まで戻ってつないでください';
-  if(!error)polygons.push(draft);
+  complete(draft,e,closed?null:'線が閉じていません。一周して線を交差させるか、始点まで戻ってください');
+}
+function complete(poly,e,initialError=null){
+  const error=initialError||G.validate(poly,polygons,config);
+  if(!error)polygons.push(poly);
   draft=[];pointer=null;
   if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
   const q=G.quote(polygons,config);
