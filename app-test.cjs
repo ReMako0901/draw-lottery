@@ -78,6 +78,7 @@ for(const amount of [500,1000,3000,5000,10000]){
 }
 let before=read('coins');click('shop-open');click('pack-500');click('purchase-back');click('purchase-confirm');assert.equal(read('coins'),before);
 click('pack-1000');click('shop-close');click('purchase-confirm');assert.equal(read('coins'),before);
+click('shop-open-bottom');assert.equal(element('shop').open,true);click('shop-close');assert.equal(read('coins'),before);
 // 残高不足からチャージして、そのまま次のラウンドへ進める。
 vm.runInContext("coins=0;phase='result';refresh()",s);assert.equal(element('primary').disabled,true);
 click('shop-open');click('pack-500');click('purchase-confirm');click('purchase-done');

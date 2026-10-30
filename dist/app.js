@@ -23,6 +23,7 @@ function update(){
   const q=metrics(), has=q.area>0, drawing=phase==='drawing';
   $('balance').textContent=money(coins);
   $('shop-open').disabled=phase==='dropping' || pointer!==null;
+  $('shop-open-bottom').disabled=phase==='dropping' || pointer!==null;
   $('area').innerHTML=`${has?(q.area*100).toFixed(1):'—'}<small>％</small>`;
   $('multiplier').innerHTML=`${has?q.multiplier.toFixed(2):'—'}<small>倍</small>`;
   $('cost').innerHTML=`${money(q.cost)}<small>coins</small>`;
@@ -185,10 +186,12 @@ $('confirm-reset').onclick=()=>{
 function shopStep(step){
   for(const name of ['select','confirm','success'])$('shop-'+name).hidden=name!==step;
 }
-$('shop-open').onclick=()=>{
+function openShop(){
   if(phase==='dropping' || pointer!==null)return;
   pendingPurchase=null;shopStep('select');$('shop').showModal();
-};
+}
+$('shop-open').onclick=openShop;
+$('shop-open-bottom').onclick=openShop;
 function closeShop(){pendingPurchase=null;$('shop').close();}
 $('shop-close').onclick=closeShop;
 $('purchase-done').onclick=closeShop;
