@@ -7,3 +7,18 @@ body{position:fixed;inset:0}
 header{min-width:0}.brand{font-size:23px}.balance-row{margin:0}.balance{font-size:31px;line-height:1.1}.eyebrow{font-size:9px}.play-section{min-height:0;display:grid;grid-template-rows:24px minmax(0,1fr) 20px;gap:5px}.board-heading{margin:0}.board-slot{container-type:size;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;overflow:hidden}.board{flex:none;width:min(100cqw,100cqh);height:min(100cqw,100cqh);max-width:100%;max-height:100%;border-radius:15px}.board-footer{margin:0;align-items:center}.stats{margin:0;align-self:center}.stats span{margin-bottom:5px}.stats strong{font-size:21px}.edit-row{min-width:0}.message{margin:0;min-height:0;align-self:center;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.primary{min-height:0;height:50px;align-self:center}.bottom-meta{margin:0;min-width:0}.bottom-meta .quiet{flex-shrink:0}.app>footer{display:none}.rules{margin:auto;max-width:420px;max-height:85vh;max-height:85dvh;overflow-y:auto;overscroll-behavior:contain;padding:18px}.rules-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:-18px;background:#fff;padding:4px 0}.rules-heading h2{margin:0}.rules .secondary{flex-shrink:0}#reset-dialog{max-height:85dvh;overflow:auto}
 @media(max-width:360px){.app{padding-left:12px;padding-right:12px;gap:6px}.brand span{font-size:9px}.stats strong{font-size:19px}.stats>div{padding:0 6px}.secondary{padding:7px 8px}h1{font-size:12px}.bottom-meta{font-size:9px}.board-hint>span:last-child{font-size:9px}}
 @media(max-height:640px){.app{grid-template-rows:26px 46px minmax(0,1fr) 42px 34px 28px 44px 24px;gap:5px;padding-top:max(6px,env(safe-area-inset-top));padding-bottom:max(6px,env(safe-area-inset-bottom))}.balance{font-size:25px}.brand{font-size:20px}.play-section{grid-template-rows:20px minmax(0,1fr) 17px;gap:3px}.primary{height:44px}.secondary{min-height:32px}.stats strong{font-size:18px}.stats span{font-size:9px;margin-bottom:3px}.hint-icon{font-size:32px}.board-hint{gap:6px}.board-hint strong{font-size:11px}.quiet{padding:6px 0}}
+
+/* 数値を主役にし、描画面を左右いっぱいに使う。 */
+.app{grid-template-rows:30px 58px minmax(0,1fr) 48px 64px 30px 50px 24px}
+.play-section{grid-template-rows:minmax(0,1fr) 20px}
+.board-slot{container-type:normal}
+.board{width:100%;height:100%;aspect-ratio:auto}
+.edit-row{align-items:center}
+.profit-panel{margin-left:auto;text-align:right;min-width:0}
+#profit-label{display:block;font-size:10px;color:var(--muted);margin-bottom:3px}
+#profit{display:block;font-size:34px;font-weight:800;line-height:1.1;color:var(--blue);letter-spacing:-1px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#profit small{font-size:10px;font-weight:500;letter-spacing:0;color:var(--muted)}
+#profit.negative{color:#bc4141}
+.bottom-meta{justify-content:flex-end}
+@media(max-width:360px){#profit{font-size:28px}.edit-row{gap:5px}.secondary{padding:7px}.app{padding-left:12px;padding-right:12px}}
+@media(max-height:640px){.app{grid-template-rows:26px 46px minmax(0,1fr) 42px 54px 28px 44px 24px}.play-section{grid-template-rows:minmax(0,1fr) 17px}#profit{font-size:28px}}

@@ -22,8 +22,9 @@
   function area(poly) {
     return Math.abs(poly.reduce((s,p,i)=>{const q=poly[(i+1)%poly.length];return s+p.x*q.y-q.x*p.y;},0))/2;
   }
-  function perimeter(poly) {
-    return poly.reduce((s,p,i)=>s+distance(p,poly[(i+1)%poly.length]),0);
+  const segmentLength=(a,b,aspect=1)=>Math.hypot(a.x-b.x,(a.y-b.y)*aspect);
+  function perimeter(poly,aspect=1) {
+    return poly.reduce((s,p,i)=>s+segmentLength(p,poly[(i+1)%poly.length],aspect),0);
   }
   function selfIntersects(poly) {
     for(let i=0;i<poly.length;i++) for(let j=i+1;j<poly.length;j++) {
@@ -50,11 +51,11 @@
   }
   function quote(polys,config) {
     const a=polys.reduce((s,p)=>s+area(p),0);
-    const length=polys.reduce((s,p)=>s+perimeter(p),0);
-    // コインは小数第2位まで。料金・払戻とも確定表示と決済に同じ値を使う。
-    const cost=Math.round(length/config.drawingCostUnitLength*config.drawingCostPerUnit*100)/100;
+    const length=polys.reduce((s,p)=>s+perimeter(p,config.boardAspectRatio||1),0);
+    // 仮想コインは整数で決済。料金・払戻とも端数を切り捨てる。
+    const cost=Math.floor(length/config.drawingCostUnitLength*config.drawingCostPerUnit+1e-9);
     const m=multiplier(a,config);
-    return {area:a,length,cost,multiplier:m,payout:Math.floor(config.blind*m*100+1e-7)/100};
+    return {area:a,length,cost,multiplier:m,payout:Math.floor(config.blind*m+1e-9)};
   }
   function validate(poly,polys,config) {
     if(poly.length<3 || area(poly)<0.0001) return '少し広めに囲んでください';
@@ -63,7 +64,7 @@
     if(quote([...polys,poly],config).area>config.maxArea+EPS) return '囲める面積は85％までです';
     return null;
   }
-  const api={distance,contains,area,perimeter,selfIntersects,overlaps,multiplier,quote,validate};
+  const api={distance,segmentLength,contains,area,perimeter,selfIntersects,overlaps,multiplier,quote,validate};
   if(typeof module!=='undefined') module.exports=api;
   else root.GameMath=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

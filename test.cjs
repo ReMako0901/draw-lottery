@@ -18,6 +18,10 @@ assert.match(G.validate(rect(0,0,.95,.95),[],C),/85/);
 near(G.quote([a],C).cost,16);
 near(G.quote([a,b],C).cost,32);
 near(G.quote([a],{...C,drawingCostUnitLength:.5}).cost,8);
+near(G.quote([a],{...C,boardAspectRatio:.5}).cost,12);
+near(G.quote([a],{...C,boardAspectRatio:.5}).area,.04);
+assert.equal(G.quote([rect(.1,.1,.333,.222)],C).cost,22);
+assert.equal(G.quote([rect(0,0,.33,1)],C).payout,303);
 near(G.multiplier(.1,C),10);near(G.multiplier(.5,C),2);near(G.multiplier(.85,C),1.1);
 let last=1;
 for(let p=.5;p<=.85;p+=.001){const rate=p*G.multiplier(p,C);assert.ok(rate<=last+1e-9);last=rate;}

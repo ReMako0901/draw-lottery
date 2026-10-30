@@ -46,4 +46,11 @@ click('reset');click('confirm-reset');assert.equal(read('coins'),1000);assert.eq
 // 最後のラウンドで外れ、次のブラインドを払えなくなった場合。
 click('primary');vm.runInContext('coins=9',s);draw(square);random=.8;click('primary');frame(1200);
 assert.equal(read('coins'),1);assert.equal(element('primary').disabled,true);assert.match(element('primary').innerHTML,/コイン不足/);
+click('reset');click('confirm-reset');click('primary');
+draw([[0,0],[.33,0],[.33,1],[0,1]]);
+assert.equal(read('G.quote(polygons,config).payout'),303);
+assert.match(element('profit').innerHTML,/\+177/); // 基準長さ0.5: コスト26、303-100-26
+random=.2;click('primary');frame(1200);
+assert.equal(read('coins'),1177);assert.ok(Number.isInteger(read('coins')));
+assert.match(element('profit').innerHTML,/\+177/);assert.equal(element('profit-label').textContent,'今回の純利益');
 console.log('PASS: start, draw, reject overlap/crossing/oversize, undo, clear, hit/miss settlement, history, deferred settings, insufficient coins, reset');
