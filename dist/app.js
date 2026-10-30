@@ -34,21 +34,22 @@ function update(){
   }else{
     $('primary').innerHTML=coins<config.blind?'コイン不足で終了':`${phase==='ready'?'ラウンド開始':'次のラウンド'} <span>−${config.blind} coins</span>`;
   }
-  const net=phase==='result'?lastNet:(has?q.payout-config.blind-q.cost:null);
-  $('profit-label').textContent=phase==='result'?'今回の純利益':'当選時の純利益';
-  $('profit').innerHTML=net===null?'—<small> coins</small>':`${net>=0?'+':''}${money(net)}<small> coins</small>`;
-  $('profit').classList.toggle('negative',net!==null && net<0);
+  $('profit-label').textContent='当選時の払戻';
+  $('profit').innerHTML=has?`${money(phase==='dropping'||phase==='result'?settledQuote.payout:q.payout)}<small> coins</small>`:'—<small> coins</small>';
   if(phase==='ready') $('board-hint').querySelector('strong').textContent='開始して、好きな場所を囲む';
   else $('board-hint').querySelector('strong').textContent='好きな場所を囲む';
 }
 function drawPolygon(poly,preview=false){
   if(!poly.length)return;
+  const near=preview && poly.length>=3 && screenDistance(poly[0],poly[poly.length-1])<=config.closureTolerancePx;
+  // 終点だけを始点へ吸着表示。遠く離れた線を自動で閉じない。
+  const visible=near?[...poly.slice(0,-1),poly[0]]:poly;
   ctx.beginPath();ctx.moveTo(poly[0].x*boardWidth,poly[0].y*boardHeight);
-  for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i].x*boardWidth,poly[i].y*boardHeight);
+  for(let i=1;i<visible.length;i++)ctx.lineTo(visible[i].x*boardWidth,visible[i].y*boardHeight);
   if(!preview){ctx.closePath();ctx.fillStyle='rgba(64,128,255,.36)';ctx.fill();}
   ctx.strokeStyle=preview?'#6798fa':'#397af4';ctx.lineWidth=preview?1.5:1.8;ctx.setLineDash(preview?[4,3]:[]);ctx.stroke();ctx.setLineDash([]);
   if(preview){
-    const start=poly[0], near=poly.length>=3 && screenDistance(start,poly[poly.length-1])<=config.closureTolerancePx;
+    const start=poly[0];
     ctx.beginPath();ctx.arc(start.x*boardWidth,start.y*boardHeight,config.closureTolerancePx,0,Math.PI*2);
     ctx.fillStyle=near?'rgba(36,95,240,.2)':'rgba(36,95,240,.07)';ctx.fill();ctx.strokeStyle='#245ff0';ctx.lineWidth=1.5;ctx.stroke();
     ctx.beginPath();ctx.arc(start.x*boardWidth,start.y*boardHeight,3,0,Math.PI*2);ctx.fillStyle='#245ff0';ctx.fill();
@@ -106,14 +107,19 @@ canvas.addEventListener('pointerdown',e=>{
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerId!==pointer)return;
   const p=point(e);
-  if(G.distance(draft[draft.length-1],p)>=.004 && draft.length<650){draft.push(p);refresh();}
+  if(G.distance(draft[draft.length-1],p)>=.004 && draft.length<650){
+    draft.push(p);
+    message(draft.length>=3 && screenDistance(draft[0],p)<=config.closureTolerancePx?'始点につながりました。指を離して確定':'始点の丸まで戻り、指を離して囲みを確定');
+    refresh();
+  }
 });
 function finish(e){
   if(e.pointerId!==pointer)return;
   const p=point(e);
   if(G.distance(draft[draft.length-1],p)>.002)draft.push(p);
   const closed=draft.length>=3 && screenDistance(draft[0],p)<=config.closureTolerancePx;
-  if(draft.length>3 && G.distance(draft[0],draft[draft.length-1])<1e-6)draft.pop();
+  // 吸着範囲内の終端を整理し、始点にぴったりつながる輪郭で判定する。
+  if(closed)while(draft.length>3 && screenDistance(draft[0],draft[draft.length-1])<=config.closureTolerancePx)draft.pop();
   const error=closed?G.validate(draft,polygons,config):'線が閉じていません。始点まで戻ってつないでください';
   if(!error)polygons.push(draft);
   draft=[];pointer=null;
