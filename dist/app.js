@@ -11,7 +11,12 @@ const canvas=$('canvas'), ctx=canvas.getContext('2d');
 let boardSize=0;
 
 function message(text,error=false){currentMessage=text;$('message').textContent=text;$('message').classList.toggle('error',error);}
-function metrics(){return G.quote(draft.length>=3?[...polygons,draft]:polygons,config);}
+function metrics(){
+  const q=G.quote(polygons,config);
+  const openLength=draft.reduce((sum,p,i)=>i?sum+G.distance(draft[i-1],p):sum,0);
+  q.cost=Math.round((q.length+openLength)/config.drawingCostUnitLength*config.drawingCostPerUnit*100)/100;
+  return q;
+}
 function update(){
   const q=metrics(), has=q.area>0, drawing=phase==='drawing';
   $('balance').textContent=money(coins);
@@ -42,8 +47,14 @@ function drawPolygon(poly,preview=false){
   if(!poly.length)return;
   ctx.beginPath();ctx.moveTo(poly[0].x*boardSize,poly[0].y*boardSize);
   for(let i=1;i<poly.length;i++)ctx.lineTo(poly[i].x*boardSize,poly[i].y*boardSize);
-  ctx.closePath();ctx.fillStyle=preview?'rgba(64,128,255,.18)':'rgba(64,128,255,.36)';ctx.fill();
+  if(!preview){ctx.closePath();ctx.fillStyle='rgba(64,128,255,.36)';ctx.fill();}
   ctx.strokeStyle=preview?'#6798fa':'#397af4';ctx.lineWidth=preview?1.5:1.8;ctx.setLineDash(preview?[4,3]:[]);ctx.stroke();ctx.setLineDash([]);
+  if(preview){
+    const start=poly[0], near=poly.length>=3 && G.distance(start,poly[poly.length-1])*boardSize<=config.closureTolerancePx;
+    ctx.beginPath();ctx.arc(start.x*boardSize,start.y*boardSize,config.closureTolerancePx,0,Math.PI*2);
+    ctx.fillStyle=near?'rgba(36,95,240,.2)':'rgba(36,95,240,.07)';ctx.fill();ctx.strokeStyle='#245ff0';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(start.x*boardSize,start.y*boardSize,3,0,Math.PI*2);ctx.fillStyle='#245ff0';ctx.fill();
+  }
 }
 function ball(point,radius,alpha,shadow=false){
   const x=point.x*boardSize,y=point.y*boardSize;
@@ -90,7 +101,7 @@ canvas.addEventListener('pointerdown',e=>{
   if(phase!=='drawing' || pointer!==null || e.button!==0)return;
   const p=point(e);
   if(polygons.some(poly=>G.contains(poly,p))){message('青い領域の外から描き始めてください',true);return;}
-  pointer=e.pointerId;draft=[p];canvas.setPointerCapture(pointer);message('指を離すと囲みが閉じます');refresh();
+  pointer=e.pointerId;draft=[p];canvas.setPointerCapture(pointer);message('始点の丸まで戻り、指を離して囲みを確定');refresh();
 });
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerId!==pointer)return;
@@ -101,8 +112,9 @@ function finish(e){
   if(e.pointerId!==pointer)return;
   const p=point(e);
   if(G.distance(draft[draft.length-1],p)>.002)draft.push(p);
-  if(draft.length>3 && G.distance(draft[0],draft[draft.length-1])<.006)draft.pop();
-  const error=G.validate(draft,polygons,config);
+  const closed=draft.length>=3 && G.distance(draft[0],p)*boardSize<=config.closureTolerancePx;
+  if(draft.length>3 && G.distance(draft[0],draft[draft.length-1])<1e-6)draft.pop();
+  const error=closed?G.validate(draft,polygons,config):'線が閉じていません。始点まで戻ってつないでください';
   if(!error)polygons.push(draft);
   draft=[];pointer=null;
   if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);

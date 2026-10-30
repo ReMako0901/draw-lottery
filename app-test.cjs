@@ -16,15 +16,17 @@ const s=vm.createContext({console,document:{getElementById:element},window:{devi
 for(const file of ['config.js','engine.js','app.js'])vm.runInContext(fs.readFileSync('dist/'+file,'utf8'),s);
 const read=expr=>vm.runInContext(expr,s);
 const click=id=>element(id).onclick();
-function draw(points){
+function draw(points,close=true){
   const event=p=>({pointerId:1,button:0,clientX:p[0]*1000,clientY:p[1]*1000});
   element('canvas').handlers.pointerdown(event(points[0]));
   for(const p of points.slice(1))element('canvas').handlers.pointermove(event(p));
-  element('canvas').handlers.pointerup(event(points.at(-1)));
+  if(close)element('canvas').handlers.pointermove(event(points[0]));
+  element('canvas').handlers.pointerup(event(close?points[0]:points.at(-1)));
 }
 const square=[[.1,.1],[.3,.1],[.3,.3],[.1,.3]];
 assert.equal(read('coins'),1000);click('primary');assert.equal(read('coins'),900);
 assert.equal(element('primary').disabled,true);
+draw(square,false);assert.equal(read('polygons.length'),0);assert.match(element('message').textContent,/閉じていません/);assert.equal(read('coins'),900);
 draw(square);assert.equal(read('polygons.length'),1);assert.equal(read('G.quote(polygons,config).cost'),16);
 assert.equal(element('primary').disabled,false);
 draw([[.2,.05],[.4,.05],[.4,.35],[.2,.35]]);assert.equal(read('polygons.length'),1);
