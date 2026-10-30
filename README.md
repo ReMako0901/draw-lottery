@@ -2,6 +2,12 @@
 
 スマートフォンのブラウザで動く、外部ライブラリ不要のHTML/Canvasゲーム。
 
+ゲーム画面は端末の表示高に固定し、盤面を残りの高さに合わせて縮小する。ページ全体はスクロールしない。ルール・設定は別のダイアログで表示し、長い説明だけダイアログ内でスクロールする。
+
+## GitHub Pages
+
+`.github/workflows/pages.yml` がmainへのpush時にテストを実行し、`dist/`をGitHub Pagesに配置する。リポジトリのPages設定はGitHub Actionsを使用する。
+
 ## 起動
 
 `python3 -m http.server 8080 --directory dist`

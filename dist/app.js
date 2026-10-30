@@ -140,7 +140,9 @@ function settle(){
   refresh();
 }
 $('primary').onclick=()=>{if(phase==='ready' || phase==='result')start();else if(phase==='drawing')drop();};
-$('rules-toggle').onclick=()=>{const open=$('rules').hidden;$('rules').hidden=!open;$('rules-toggle').setAttribute('aria-expanded',String(open));};
+$('rules-toggle').onclick=()=>{$('rules').showModal();$('rules-toggle').setAttribute('aria-expanded','true');};
+$('rules-close').onclick=()=>$('rules').close();
+$('rules').addEventListener('close',()=>$('rules-toggle').setAttribute('aria-expanded','false'));
 $('unit-length').value=String(selectedUnit);
 $('unit-length').onchange=e=>{selectedUnit=Number(e.target.value);if(phase==='ready')config={...GAME_CONFIG,drawingCostUnitLength:selectedUnit};};
 $('reset').onclick=()=>{if(phase!=='dropping')$('reset-dialog').showModal();};
