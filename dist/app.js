@@ -24,7 +24,6 @@ function update(){
   $('area').innerHTML=`${has?(q.area*100).toFixed(1):'—'}<small>％</small>`;
   $('multiplier').innerHTML=`${has?q.multiplier.toFixed(2):'—'}<small>倍</small>`;
   $('cost').innerHTML=`${money(q.cost)}<small>coins</small>`;
-  $('undo').disabled=!drawing || !polygons.length || pointer!==null;
   $('clear').disabled=!drawing || !polygons.length || pointer!==null;
   $('history-count').textContent=`落下履歴 ${history.length}`;
   $('board-hint').hidden=has || history.length>0 || phase==='dropping' || phase==='result';
@@ -100,6 +99,7 @@ function point(e){const r=canvas.getBoundingClientRect();return{x:Math.max(0,Mat
 function refresh(){update();render(performance.now());}
 canvas.addEventListener('pointerdown',e=>{
   if(phase!=='drawing' || pointer!==null || e.button!==0)return;
+  if(polygons.length){message('囲めるのは一つです。変更する場合は「描き直す」を押してください');return;}
   const p=point(e);
   if(polygons.some(poly=>G.contains(poly,p))){message('青い領域の外から描き始めてください',true);return;}
   pointer=e.pointerId;draft=[p];canvas.setPointerCapture(pointer);message('一周描いて線を交差させるか、始点まで戻ってください');refresh();
@@ -136,14 +136,13 @@ function complete(poly,e,initialError=null){
   draft=[];pointer=null;
   if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
   const q=G.quote(polygons,config);
-  message(error || (q.cost>coins?'描画コストが残高を超えています。囲みを減らしてください':'囲みを追加するか、抽選してください'),!!error || q.cost>coins);
+  message(error || (q.cost>coins?'コストが残高を超えています。「描き直す」で輪郭を短くしてください':'抽選するか、「描き直す」で変更してください'),!!error || q.cost>coins);
   refresh();
 }
 canvas.addEventListener('pointerup',finish);
 canvas.addEventListener('pointercancel',e=>{if(e.pointerId!==pointer)return;draft=[];pointer=null;message('描画を中断しました');refresh();});
 canvas.addEventListener('lostpointercapture',()=>{if(pointer!==null){draft=[];pointer=null;refresh();}});
-$('undo').onclick=()=>{if(phase!=='drawing')return;polygons.pop();message('最後の囲みを取り消しました');refresh();};
-$('clear').onclick=()=>{if(phase!=='drawing')return;polygons=[];message('囲みをすべて消しました');refresh();};
+$('clear').onclick=()=>{if(phase!=='drawing' || pointer!==null)return;polygons=[];message('好きな場所に描き直してください。追加料金はかかりません');refresh();};
 function uniform(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
 function start(){
   if(coins<GAME_CONFIG.blind)return;

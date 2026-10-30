@@ -17,13 +17,13 @@
     <div class="board-footer"><span><i class="blue-dot"></i> 青い領域が当たり</span><span id="history-count">落下履歴 0</span></div>
   </section>
   <section class="stats" aria-label="抽選条件"><div><span>当選確率</span><strong id="area">—<small>％</small></strong></div><div><span>配当倍率</span><strong id="multiplier">—<small>倍</small></strong></div><div><span>描画コスト</span><strong id="cost">0<small>coins</small></strong></div></section>
-  <div class="edit-row"><button id="undo" class="secondary" disabled>↶ 一つ戻す</button><button id="clear" class="secondary" disabled>全消去</button><div class="profit-panel"><span id="profit-label">当選時の払戻</span><strong id="profit">—<small> coins</small></strong></div></div>
+  <div class="edit-row"><button id="clear" class="secondary" disabled>↶ 描き直す</button><div class="profit-panel"><span id="profit-label">当選時の払戻</span><strong id="profit">—<small> coins</small></strong></div></div>
   <p id="message" class="message" role="status" aria-live="polite">ブラインド100でラウンド開始</p>
   <button id="primary" class="primary">ラウンド開始 <span>−100 coins</span></button>
   <div class="bottom-meta"><button id="rules-toggle" class="quiet" aria-expanded="false">ルール・設定</button></div>
   <dialog id="rules" class="rules" aria-labelledby="rules-title">
     <div class="rules-heading"><h2 id="rules-title">ルール・設定</h2><button id="rules-close" class="secondary">閉じる</button></div>
-    <p>開始時にブラインド100を支払います。線が交差して輪ができると、交点で閉じて青い領域になります。始点の近くまで戻って指を離しても確定できます。閉じずに離した線は取り消されます。複数追加できます。既存の青い領域との重なりは不可。描画コストは抽選時に支払います。</p><p>玉は毎回独立して盤面全体から一様に落下。中心が青い領域内なら当選です。薄い玉は直近20回の履歴で、次の落下位置を予測するものではありません。</p><p>払戻＝100×面積による倍率。描画コストは元本に含まれません。面積10％以下で×10、50％で×2、85％で×1.1。50％を超えると期待払戻率が徐々に低下します。残高・払戻・描画コストは整数コインで計算し、端数は切り捨てます。</p>
+    <p>開始時にブラインド100を支払います。線が交差して輪ができると、交点で閉じて青い領域になります。始点の近くまで戻って指を離しても確定できます。閉じずに離した線は取り消されます。囲める領域は一つだけです。変更するときは「描き直す」を押すと無料で消して描き直せます。描画コストは抽選時に支払います。</p><p>玉は毎回独立して盤面全体から一様に落下。中心が青い領域内なら当選です。薄い玉は直近20回の履歴で、次の落下位置を予測するものではありません。</p><p>払戻＝100×面積による倍率。描画コストは元本に含まれません。面積10％以下で×10、50％で×2、85％で×1.1。50％を超えると期待払戻率が徐々に低下します。残高・払戻・描画コストは整数コインで計算し、端数は切り捨てます。</p>
     <label>コスト5あたりの基準長さ <select id="unit-length"><option value="0.1">盤面幅の10％</option><option value="0.25" selected>盤面幅の25％</option><option value="0.5">盤面幅の50％</option><option value="1">盤面幅の100％</option></select></label><p class="muted">値を大きくすると線が安くなります。変更は次のラウンドから適用。</p><p class="muted">試作用の仮想コインです。リセットすると履歴も消えます。</p>
   </dialog>
   <footer>DRAW / INTERACTION PROTOTYPE</footer>

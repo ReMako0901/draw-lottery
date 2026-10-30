@@ -30,10 +30,12 @@ draw(square,false);assert.equal(read('polygons.length'),0);assert.match(element(
 draw(square);assert.equal(read('polygons.length'),1);assert.equal(read('G.quote(polygons,config).cost'),16);
 assert.equal(element('primary').disabled,false);
 draw([[.2,.05],[.4,.05],[.4,.35],[.2,.35]]);assert.equal(read('polygons.length'),1);
+draw([[.6,.6],[.8,.6],[.8,.8],[.6,.8]]);assert.equal(read('polygons.length'),1);
+assert.equal(read('G.quote(polygons,config).area').toFixed(2),'0.04');
 click('primary');assert.equal(read('coins'),884);assert.equal(read('phase'),'dropping');
 frame(1200);assert.equal(read('coins'),1884);assert.equal(read('phase'),'result');assert.equal(read('history.length'),1);
 click('primary');assert.equal(read('coins'),1784);assert.equal(read('polygons.length'),0);assert.equal(read('history.length'),1);
-draw(square);click('undo');assert.equal(read('polygons.length'),0);
+draw(square);click('clear');assert.equal(read('polygons.length'),0);assert.equal(read('coins'),1784);
 draw(square);click('clear');assert.equal(read('polygons.length'),0);
 draw([[.1,.1],[.4,.4],[.1,.4],[.4,.1]]);assert.equal(read('polygons.length'),1);click('clear');
 draw([[.01,.01],[.99,.01],[.99,.99],[.01,.99]]);assert.equal(read('polygons.length'),0);
@@ -41,7 +43,7 @@ element('unit-length').onchange({target:{value:'.5'}});assert.equal(read('config
 draw(square);random=.8;click('primary');frame(1200);assert.equal(read('coins'),1768);
 click('primary');assert.equal(read('config.drawingCostUnitLength'),.5);
 draw(square);assert.equal(read('G.quote(polygons,config).cost'),8);
-vm.runInContext('coins=1',s);draw([[.6,.6],[.8,.6],[.8,.8],[.6,.8]]);assert.equal(element('primary').disabled,true);
+vm.runInContext('coins=1;refresh()',s);assert.equal(element('primary').disabled,true);
 click('reset');click('confirm-reset');assert.equal(read('coins'),1000);assert.equal(read('history.length'),0);
 // 最後のラウンドで外れ、次のブラインドを払えなくなった場合。
 click('primary');vm.runInContext('coins=9',s);draw(square);random=.8;click('primary');frame(1200);
@@ -65,4 +67,4 @@ draw([[.05,.3],[.3,.3],[.3,.6],[.6,.6],[.6,.3],[.2,.3]],false);
 assert.equal(read('polygons.length'),1);
 assert.equal(read('G.area(polygons[0])').toFixed(2),'0.09');
 assert.equal(read('G.contains(polygons[0],{x:.1,y:.3})'),false);
-console.log('PASS: start, draw, reject overlap/crossing/oversize, undo, clear, hit/miss settlement, history, deferred settings, insufficient coins, reset');
+console.log('PASS: single-region limit, free redraw, loop closure, area limit, hit/miss settlement, history, deferred settings, insufficient coins, reset');
