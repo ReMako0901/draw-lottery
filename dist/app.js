@@ -9,6 +9,7 @@ let coins=GAME_CONFIG.initialCoins, round=0, phase='ready', polygons=[], draft=[
 let pointer=null, animationId=null, animationStart=0, dropPoint=null, settledQuote=null, currentMessage='';
 const canvas=$('canvas'), ctx=canvas.getContext('2d');
 let boardWidth=0, boardHeight=0, lastNet=null;
+let pendingPurchase=null;
 const screenDistance=(a,b)=>Math.hypot((a.x-b.x)*boardWidth,(a.y-b.y)*boardHeight);
 
 function message(text,error=false){currentMessage=text;$('message').textContent=text;$('message').classList.toggle('error',error);}
@@ -21,6 +22,7 @@ function metrics(){
 function update(){
   const q=metrics(), has=q.area>0, drawing=phase==='drawing';
   $('balance').textContent=money(coins);
+  $('shop-open').disabled=phase==='dropping' || pointer!==null;
   $('area').innerHTML=`${has?(q.area*100).toFixed(1):'—'}<small>％</small>`;
   $('multiplier').innerHTML=`${has?q.multiplier.toFixed(2):'—'}<small>倍</small>`;
   $('cost').innerHTML=`${money(q.cost)}<small>coins</small>`;
@@ -179,5 +181,35 @@ $('confirm-reset').onclick=()=>{
   if(animationId!==null)cancelAnimationFrame(animationId);
   coins=GAME_CONFIG.initialCoins;lastNet=null;round=0;phase='ready';polygons=[];draft=[];history=[];latest=null;dropPoint=null;pointer=null;
   config={...GAME_CONFIG,drawingCostUnitLength:selectedUnit,boardAspectRatio:boardHeight/boardWidth||1};$('result').hidden=true;$('reset-dialog').close();message('ブラインド100でラウンド開始');refresh();
+};
+function shopStep(step){
+  for(const name of ['select','confirm','success'])$('shop-'+name).hidden=name!==step;
+}
+$('shop-open').onclick=()=>{
+  if(phase==='dropping' || pointer!==null)return;
+  pendingPurchase=null;shopStep('select');$('shop').showModal();
+};
+function closeShop(){pendingPurchase=null;$('shop').close();}
+$('shop-close').onclick=closeShop;
+$('purchase-done').onclick=closeShop;
+$('shop').addEventListener('close',()=>{pendingPurchase=null;});
+for(const amount of GAME_CONFIG.topUpAmounts)$('pack-'+amount).onclick=()=>{
+  if(!$('shop').open)return;
+  pendingPurchase=amount;
+  $('purchase-points').textContent=money(amount)+'pt';
+  $('purchase-price').textContent='¥'+money(amount);
+  $('purchase-balance').textContent=money(coins+amount)+' coins';
+  $('purchase-confirm').textContent=`¥${money(amount)}で購入（モック）`;
+  $('purchase-confirm').disabled=false;shopStep('confirm');$('purchase-confirm').focus();
+};
+$('purchase-back').onclick=()=>{pendingPurchase=null;shopStep('select');$('pack-500').focus();};
+$('purchase-confirm').onclick=()=>{
+  if(!$('shop').open || !GAME_CONFIG.topUpAmounts.includes(pendingPurchase))return;
+  const amount=pendingPurchase;
+  pendingPurchase=null;$('purchase-confirm').disabled=true;
+  coins+=amount;
+  $('purchase-added').textContent='＋'+money(amount)+' coins';
+  $('purchase-total').textContent='所持コイン '+money(coins);
+  shopStep('success');message(`モック購入で${money(amount)}コイン追加しました`);refresh();$('purchase-done').focus();
 };
 update();

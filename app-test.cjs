@@ -4,7 +4,7 @@ const elements=new Map();let frame=null,random=.2;
 function element(id){
   if(elements.has(id))return elements.get(id);
   const e={id,hidden:false,disabled:false,value:'',textContent:'',innerHTML:'',handlers:{},classList:{toggle(){}},
-    setAttribute(){},querySelector(){return element('hint-strong');},addEventListener(type,f){this.handlers[type]=f;},
+    setAttribute(){},focus(){},querySelector(){return element('hint-strong');},addEventListener(type,f){this.handlers[type]=f;},
     setPointerCapture(){},releasePointerCapture(){},hasPointerCapture(){return true;},
     getBoundingClientRect(){return {left:0,top:0,width:1000,height:1000};},
     showModal(){this.open=true;},close(){this.open=false;}};
@@ -67,4 +67,19 @@ draw([[.05,.3],[.3,.3],[.3,.6],[.6,.6],[.6,.3],[.2,.3]],false);
 assert.equal(read('polygons.length'),1);
 assert.equal(read('G.area(polygons[0])').toFixed(2),'0.09');
 assert.equal(read('G.contains(polygons[0],{x:.1,y:.3})'),false);
-console.log('PASS: single-region limit, free redraw, loop closure, area limit, hit/miss settlement, history, deferred settings, insufficient coins, reset');
+// 金額選択だけでは増えず、確認時に一度だけ加算される。
+for(const amount of [500,1000,3000,5000,10000]){
+  const before=read('coins');click('shop-open');click('pack-'+amount);
+  assert.equal(read('coins'),before);
+  assert.equal(element('purchase-price').textContent,'¥'+amount.toLocaleString('ja-JP'));
+  click('purchase-confirm');assert.equal(read('coins'),before+amount);
+  click('purchase-confirm');assert.equal(read('coins'),before+amount);
+  assert.equal(read('polygons.length'),1);click('purchase-done');
+}
+let before=read('coins');click('shop-open');click('pack-500');click('purchase-back');click('purchase-confirm');assert.equal(read('coins'),before);
+click('pack-1000');click('shop-close');click('purchase-confirm');assert.equal(read('coins'),before);
+// 残高不足からチャージして、そのまま次のラウンドへ進める。
+vm.runInContext("coins=0;phase='result';refresh()",s);assert.equal(element('primary').disabled,true);
+click('shop-open');click('pack-500');click('purchase-confirm');click('purchase-done');
+assert.equal(read('coins'),500);assert.equal(element('primary').disabled,false);click('primary');assert.equal(read('coins'),400);
+console.log('PASS: single region, redraw, loop closure, settlement, mock purchases (all amounts, cancel, duplicate prevention, recovery)');

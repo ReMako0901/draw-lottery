@@ -11,7 +11,7 @@
 <body>
 <main class="app">
   <header><div class="brand">DRAW</div><button id="reset" class="quiet">リセット</button></header>
-  <section class="balance-row"><div><span class="eyebrow">所持コイン</span><div class="balance"><span id="balance">1,000</span><small>coins</small></div></div></section>
+  <section class="balance-row"><div><span class="eyebrow">所持コイン</span><div class="balance"><span id="balance">1,000</span><small>coins</small></div></div><button id="shop-open" class="charge-button">＋ 課金<small>モック</small></button></section>
   <section class="play-section">
     <div class="board-slot"><div class="board" id="board"><canvas id="canvas" aria-label="指やマウスで当たりの領域を囲む白い盤面"></canvas><div class="board-hint" id="board-hint"><span class="hint-icon">◌</span><strong>好きな場所を囲む</strong><span>一周させて線を交差させよう</span></div><div id="result" class="result" hidden></div></div></div>
     <div class="board-footer"><span><i class="blue-dot"></i> 青い領域が当たり</span><span id="history-count">落下履歴 0</span></div>
@@ -29,5 +29,31 @@
   <footer>DRAW / INTERACTION PROTOTYPE</footer>
 </main>
 <dialog id="reset-dialog"><h2>最初から遊び直す？</h2><p>持ちコインを1000に戻し、囲みと落下履歴を消します。</p><div class="dialog-actions"><button id="cancel-reset" class="secondary">戻る</button><button id="confirm-reset" class="primary">リセット</button></div></dialog>
+<dialog id="shop" class="shop" aria-labelledby="shop-title">
+  <div class="shop-heading"><h2 id="shop-title">コインチャージ</h2><button id="shop-close" class="quiet" aria-label="チャージ画面を閉じる">閉じる</button></div>
+  <div class="mock-notice"><b>MOCK</b><span>実際の請求・支払いは発生しません</span></div>
+  <section id="shop-select">
+    <p class="shop-rate">1pt＝1円相当 <span>1ptで1コイン追加</span></p>
+    <div class="coin-packs" aria-label="購入ポイント数">
+      <button id="pack-500" class="coin-pack"><span class="coin-symbol">P</span><strong>500<small>pt</small></strong><span class="pack-price">¥500</span></button>
+      <button id="pack-1000" class="coin-pack"><span class="coin-symbol">P</span><strong>1,000<small>pt</small></strong><span class="pack-price">¥1,000</span></button>
+      <button id="pack-3000" class="coin-pack"><span class="coin-symbol">P</span><strong>3,000<small>pt</small></strong><span class="pack-price">¥3,000</span></button>
+      <button id="pack-5000" class="coin-pack"><span class="coin-symbol">P</span><strong>5,000<small>pt</small></strong><span class="pack-price">¥5,000</span></button>
+      <button id="pack-10000" class="coin-pack"><span class="coin-symbol">P</span><strong>10,000<small>pt</small></strong><span class="pack-price">¥10,000</span></button>
+    </div>
+    <p class="shop-footnote">金額を選ぶと購入確認に進みます。</p>
+  </section>
+  <section id="shop-confirm" hidden>
+    <p class="purchase-caption">購入内容をご確認ください</p>
+    <div class="purchase-product"><span class="coin-symbol">P</span><div><strong id="purchase-points">500pt</strong><small>DRAW ポイント</small></div></div>
+    <dl class="purchase-details"><div><dt>お支払い金額</dt><dd id="purchase-price">¥500</dd></div><div><dt>お支払い方法</dt><dd>デモ決済</dd></div><div><dt>追加後の所持コイン</dt><dd id="purchase-balance">1,500</dd></div></dl>
+    <p class="purchase-note">モック購入です。購入を確定するとゲーム内コインのみ追加されます。</p>
+    <button id="purchase-confirm" class="primary">¥500で購入（モック）</button>
+    <button id="purchase-back" class="shop-back">金額を選び直す</button>
+  </section>
+  <section id="shop-success" class="shop-success" hidden aria-live="polite">
+    <div class="success-check">✓</div><h3>チャージ完了</h3><strong id="purchase-added">＋500 coins</strong><p id="purchase-total">所持コイン 1,500</p><p class="purchase-note">モック購入のため、お支払いは発生していません。</p><button id="purchase-done" class="primary">ゲームに戻る</button>
+  </section>
+</dialog>
 <script src="config.js"></script><script src="engine.js"></script><script src="app.js"></script>
 </body></html>

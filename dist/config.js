@@ -2,6 +2,7 @@
 const GAME_CONFIG = Object.freeze({
   initialCoins: 1000,
   blind: 100,
+  topUpAmounts: [500, 1000, 3000, 5000, 10000],
   drawingCostPerUnit: 5,
   drawingCostUnitLength: 0.25,
   maxArea: 0.85,
