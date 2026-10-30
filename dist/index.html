@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f6fa">
+  <meta name="description" content="過去の落下位置を見て、自分の当たりを描く抽選ゲーム。">
+  <title>DRAW — 当たりを描く</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+  <header><div class="brand">DRAW<span>当たりを描く</span></div><button id="reset" class="quiet">リセット</button></header>
+  <section class="balance-row"><div><span class="eyebrow">YOUR COINS</span><div class="balance"><span id="balance">1,000</span><small>coins</small></div></div><div class="round"><span id="round">ROUND 01</span><span class="round-dot"></span></div></section>
+  <section class="play-section">
+    <div class="board-heading"><h1 id="instruction">自分の当たりを、描こう。</h1><span id="phase-label">READY</span></div>
+    <div class="board" id="board"><canvas id="canvas" aria-label="指やマウスで当たりの領域を囲む白い盤面"></canvas><div class="board-hint" id="board-hint"><span class="hint-icon">◌</span><strong>好きな場所を囲む</strong><span>始点と終点は自動でつながります</span></div><div id="result" class="result" hidden></div></div>
+    <div class="board-footer"><span><i class="blue-dot"></i> 青い領域が当たり</span><span id="history-count">落下履歴 0</span></div>
+  </section>
+  <section class="stats" aria-label="抽選条件"><div><span>当選確率</span><strong id="area">—<small>％</small></strong></div><div><span>配当倍率</span><strong id="multiplier">—<small>倍</small></strong></div><div><span>描画コスト</span><strong id="cost">0<small>coins</small></strong></div></section>
+  <div class="edit-row"><button id="undo" class="secondary" disabled>↶ 一つ戻す</button><button id="clear" class="secondary" disabled>全消去</button><span id="payout-label">当選時の払戻 <b id="payout">—</b></span></div>
+  <p id="message" class="message" role="status" aria-live="polite">ブラインド100でラウンド開始</p>
+  <button id="primary" class="primary">ラウンド開始 <span>−100 coins</span></button>
+  <div class="bottom-meta"><span id="profit">まずは盤面に線を描こう</span><button id="rules-toggle" class="quiet" aria-expanded="false">ルール・設定</button></div>
+  <section id="rules" class="rules" hidden>
+    <h2>遊び方</h2><p>開始時にブラインド100を支払います。指で囲んだ領域は青くなり、複数追加できます。線の交差・領域の重なりは不可。描画コストは抽選時に支払います。</p><p>玉は毎回独立して盤面全体から一様に落下。中心が青い領域内なら当選です。薄い玉は直近20回の履歴で、次の落下位置を予測するものではありません。</p><p>払戻＝100×面積による倍率。描画コストは元本に含まれません。面積10％以下で×10、50％で×2、85％で×1.1。50％を超えると期待払戻率が徐々に低下します。残高と払戻は小数第2位まで計算します。</p>
+    <label>コスト5あたりの基準長さ <select id="unit-length"><option value="0.1">盤面幅の10％</option><option value="0.25" selected>盤面幅の25％</option><option value="0.5">盤面幅の50％</option><option value="1">盤面幅の100％</option></select></label><p class="muted">値を大きくすると線が安くなります。変更は次のラウンドから適用。</p><p class="muted">試作用の仮想コインです。リセットすると履歴も消えます。</p>
+  </section>
+  <footer>DRAW / INTERACTION PROTOTYPE</footer>
+</main>
+<dialog id="reset-dialog"><h2>最初から遊び直す？</h2><p>持ちコインを1000に戻し、囲みと落下履歴を消します。</p><div class="dialog-actions"><button id="cancel-reset" class="secondary">戻る</button><button id="confirm-reset" class="primary">リセット</button></div></dialog>
+<script src="config.js"></script><script src="engine.js"></script><script src="app.js"></script>
+</body></html>

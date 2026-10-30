@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict');
+const G=require('./dist/engine.js'), C=require('./dist/config.js');
+const rect=(x,y,w,h)=>[{x,y},{x:x+w,y},{x:x+w,y:y+h},{x,y:y+h}];
+const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
+const a=rect(.1,.1,.2,.2), b=rect(.5,.5,.2,.2);
+near(G.area(a),.04);near(G.perimeter(a),.8);
+assert.equal(G.contains(a,{x:.2,y:.2}),true);
+assert.equal(G.contains(a,{x:.4,y:.2}),false);
+assert.equal(G.contains(a,{x:.1,y:.2}),true);
+assert.equal(G.overlaps(a,b),false);
+assert.equal(G.overlaps(a,rect(.15,.15,.03,.03)),true);
+assert.equal(G.overlaps(a,rect(.25,.05,.1,.4)),true);
+assert.equal(G.selfIntersects([{x:0,y:0},{x:1,y:1},{x:0,y:1},{x:1,y:0}]),true);
+assert.equal(G.selfIntersects(a),false);
+assert.equal(G.validate(b,[a],C),null);
+assert.match(G.validate(a,[a],C),/重ね/);
+assert.match(G.validate(rect(0,0,.95,.95),[],C),/85/);
+near(G.quote([a],C).cost,16);
+near(G.quote([a,b],C).cost,32);
+near(G.quote([a],{...C,drawingCostUnitLength:.5}).cost,8);
+near(G.multiplier(.1,C),10);near(G.multiplier(.5,C),2);near(G.multiplier(.85,C),1.1);
+let last=1;
+for(let p=.5;p<=.85;p+=.001){const rate=p*G.multiplier(p,C);assert.ok(rate<=last+1e-9);last=rate;}
+assert.equal(G.quote([a],C).payout,1000);
+assert.equal(G.quote([],C).payout,0);
+console.log('PASS: geometry, overlap, area limit, adjustable cost, payout, return curve');
